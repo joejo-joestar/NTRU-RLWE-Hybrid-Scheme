@@ -10,8 +10,10 @@ This project demonstrates the NTRU-RLWE hybrid scheme for homomorphic encryption
 ## Requirements
 
 OS: Linux (WSL2)
+
 Python version: 3.10
-Dependencies: The project requires the following Python packages:
+
+Dependencies:
 
 - tenseal: library for homomorphic encryption
 - numpy: for numerical operations
