@@ -13,14 +13,14 @@ This file provides various utility functions for polynomial arithmetic, random p
 * **`poly_mod(poly: np.ndarray, q: int) -> np.ndarray`**
   * **Purpose**: Reduces each coefficient of a polynomial modulo `q`, mapping them to the symmetric range `[-q/2, q/2]`.
   * **Math Used**: The formula effectively used is:
-\$ coeff_{mod_q} = (coeff + \lfloor q/2 \rfloor) \pmod q - \lfloor q/2 \rfloor \$
+$coeff_{mod_q} = (coeff + \lfloor q/2 \rfloor) \pmod q - \lfloor q/2 \rfloor$
 If `q` is odd, `q//2` is `(q-1)/2`. If `q` is even, `q//2` is `q/2`.
 The implementation is `(poly + q // 2) % q - q // 2`.
 * **`poly_add(poly1: np.ndarray, poly2: np.ndarray, q: int) -> np.ndarray`**
   * **Purpose**: Adds two polynomials `poly1` and `poly2` coefficient-wise, and then reduces each coefficient of the result modulo `q` using `poly_mod`.
   * **Math Used**:
     * Polynomial addition: `poly1 + poly2` (element-wise).
-    * Coefficient-wise modular reduction via `poly_mod(sum_poly, q)`. Represents \$ (p_1(x) + p_2(x)) \pmod q \$.
+    * Coefficient-wise modular reduction via `poly_mod(sum_poly, q)`. Represents $(p_1(x) + p_2(x)) \pmod q$.
 * **`poly_mul(poly1: np.ndarray, poly2: np.ndarray, q: int, N: int) -> np.ndarray`**
   * **Purpose**: Multiplies two polynomials `poly1` and `poly2` in the polynomial ring $R_{q,N} = \mathbb{Z}_q[x]/(x^N+1)$.
   * **Details**:
@@ -32,7 +32,7 @@ For a term `c_i x^i` in `result_full`:
 If $i < N$, it contributes `c_i` to `remainder[i]`. ($i // N = 0$)
 If $N \le i < 2N$, let $i = N+k$ where $0 \le k < N$. Then $x^i = x^{N+k} = x^N x^k \equiv -x^k$. It contributes `-c_i` to `remainder[k]`. ($i // N = 1$)
 And so on for higher degrees if `poly1`, `poly2` were not degree $<N$.
-3. Coefficient-wise modular reduction of `remainder` modulo `q` using `poly_mod`.
+1. Coefficient-wise modular reduction of `remainder` modulo `q` using `poly_mod`.
     * **Math Used**: Polynomial multiplication (convolution). Ring arithmetic in $R_{q,N}$, specifically reduction modulo the cyclotomic polynomial $x^N+1$. Coefficient-wise modular reduction modulo $q$.
 
 * **`poly_inverse_ntru(poly: np.ndarray, q: int) -> np.ndarray`**
@@ -41,8 +41,7 @@ And so on for higher degrees if `poly1`, `poly2` were not degree $<N$.
   * **Actual Math for Inverse**: To find $p(x)^{-1} \pmod{q, x^N+1}$:
 
 1. The polynomial $p(x)$ must be invertible. This means its resultant with $x^N+1$ must be coprime to $q$ (i.e., $\gcd(\text{Res}(p(x), x^N+1), q) = 1$).
-2. The extended Euclidean algorithm for polynomials is used. Given $p(x)$ and $m(x) = x^N+1$, it finds polynomials $u(x)$ and $v(x)$ such that:
-\$ p(x)u(x) + m(x)v(x) = \gcd(p(x), m(x)) \$
+2. The extended Euclidean algorithm for polynomials is used. Given $p(x)$ and $m(x) = x^N+1$, it finds polynomials $u(x)$ and $v(x)$ such that: $p(x)u(x) + m(x)v(x) = \gcd(p(x), m(x))$
 If this gcd is 1 (or an invertible constant modulo $q$), then $u(x)$ (after scaling by the inverse of the gcd if it's not 1) is the inverse of $p(x)$ modulo $m(x)$. All polynomial coefficient arithmetic is performed modulo $q$.
 
 * **`estimate_noise_ntru(ciphertext: np.ndarray, secret_key: np.ndarray, q: int, N: int) -> float`**

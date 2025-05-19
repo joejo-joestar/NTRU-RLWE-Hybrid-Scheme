@@ -25,24 +25,23 @@ It initializes `self.ntru` (an instance of `NTRU`) and `self.rlwe` (an instance 
   * **Purpose**: Decrypts a hybrid ciphertext.
   * **Details**: This is a two-layer decryption, reversing the encryption process:
 
-1. The RLWE ciphertext `(a,b)` is decrypted using the RLWE secret key: `decrypted_rlwe = self.rlwe.decrypt(ciphertext, partial=partial)`. If `partial` is true, this is $m_{\text{NTRU_ct}} + e_{\text{RLWE}}$. Otherwise, it is $m_{\text{NTRU_ct}}$ (the NTRU ciphertext).
+1. The RLWE ciphertext `(a,b)` is decrypted using the RLWE secret key: `decrypted_rlwe = self.rlwe.decrypt(ciphertext, partial=partial)`. If `partial` is true, this is $m_{\text{NTRU\_ct}} + e_{\text{RLWE}}$. Otherwise, it is $m_{\text{NTRU\_ct}}$ (the NTRU ciphertext).
 2. The result `decrypted_rlwe` (which is an NTRU ciphertext) is then decrypted using the NTRU private key: `final_plaintext = self.ntru.decrypt(decrypted_rlwe, partial=partial)`. If `partial` is true, this is an intermediate NTRU decryption value. Otherwise, it's the original message polynomial.
     * **Math Used**: Relies on `self.rlwe.decrypt` and `self.ntru.decrypt`. The `partial` flag affects whether final plaintext space reductions/cleanups are performed.
 
 * **`add(self, ct1: tuple, ct2: tuple) -> tuple`**
   * **Purpose**: Performs homomorphic addition of two hybrid scheme ciphertexts. Since the outer layer is RLWE, this typically means RLWE addition.
-  * **Details**: Given two RLWE ciphertexts $ct_1 = (a_1, b_1)$ and $ct_2 = (a_2, b_2)$, the addition is usually component-wise:
-\$ ct_{add} = ( (a_1 + a_2) \pmod q, (b_1 + b_2) \pmod q ) \$
+  * **Details**: Given two RLWE ciphertexts $ct_1 = (a_1, b_1)$ and $ct_2 = (a_2, b_2)$, the addition is usually component-wise: $ct_{add} = ( (a_1 + a_2) \pmod q, (b_1 + b_2) \pmod q )$
 This relies on the property that $Dec(ct_1 + ct_2) = Dec(ct_1) + Dec(ct_2)$.
   * **Math Used**: Polynomial addition performed coefficient-wise, followed by coefficient-wise modular reduction modulo $q$.
     * `a_sum = poly_add(ct1, ct2, self.q)`
     * `b_sum = poly_add(ct1[1], ct2[1], self.q)`
-These use `poly_add` from `utils.py`, which performs \$ (p_1[i] + p_2[i]) \pmod q \$ for each coefficient $i$.
+These use `poly_add` from `utils.py`, which performs $(p_1[i] + p_2[i]) \pmod q$ for each coefficient $i$.
 * **`mul(self, ct1: tuple, ct2: tuple) -> tuple`**
   * **Purpose**: Performs homomorphic multiplication of two hybrid scheme ciphertexts.
   * **Details**: The implementation is described as a "simplified version." For standard RLWE ciphertexts $ct_1=(a_1,b_1)$ and $ct_2=(a_2,b_2)$, a common way to multiply (before relinearization) results in a 3-component ciphertext related to $m_1 m_2$. The provided code computes:
-\$ a_{new} = (a_1 \cdot a_2 + a_1 \cdot b_2) \pmod{q, x^N+1} \$
-\$ b_{new} = (b_1 \cdot a_2 + b_1 \cdot b_2) \pmod{q, x^N+1} \$
+$a_{new} = (a_1 \cdot a_2 + a_1 \cdot b_2) \pmod{q, x^N+1}$
+$b_{new} = (b_1 \cdot a_2 + b_1 \cdot b_2) \pmod{q, x^N+1}$
 The new ciphertext is $(a_{\text{new}}, b_{\text{new}})$. This structure is non-standard for obtaining a ciphertext of $m_1 m_2$. It might be specific to this hybrid approach or a simplification.
   * **Math Used**: Polynomial addition (`poly_add`) and polynomial multiplication (`poly_mul`) in the ring $R_q = \mathbb{Z}_q[x]/(x^N+1)$.
   * **Simulated Aspect**: A production-level RLWE multiplication typically involves computing terms like $c_0 = b_1 b_2 \pmod q$, $c_1 = a_1 b_2 + a_2 b_1 \pmod q$, and $c_2 = a_1 a_2 \pmod q$. The resulting ciphertext, encrypting $m_1 m_2$, is of a larger form (quadratic in the secret key) and requires a "relinearization" step (using an evaluation key, also known as key switching) to reduce it back to a standard 2-component ciphertext. Modulus switching might also be used to manage noise growth. The current form seems to be an ad-hoc operation.

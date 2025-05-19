@@ -16,22 +16,16 @@ This class encapsulates all benchmarking logic as static methods.
   * **Math Used**:
     * Implicitly uses the mean of timings (calculated during benchmarking) for bar heights.
     * Pandas `melt` function is used for data reshaping, which is a data manipulation technique.
-* **`plot_feature_comparison(results_df, save_dir="results")`**
-  * **Purpose**: Creates and saves a scatter plot to visually compare feature support (e.g., bootstrapping capability, multiparty computation support) across the different FHE schemes.
-  * **Details**: Visualizes categorical data about features.
-  * **Math Used**: None directly; it's a qualitative visualization.
 * **`test_multiparty(iterations=3)`**
   * **Purpose**: Intended to benchmark or test multiparty decryption support for the NTRU-RLWE hybrid scheme.
-  * **Details**: It simulates a scenario with three parties. Party 0 encrypts a message. Each party performs a partial decryption of the ciphertext. These partials are then combined to attempt to retrieve the original message. The code contains a comment "NOTE: Doesnt work!!", indicating potential issues or incompleteness.
+  * **Details**: It simulates a scenario with three parties. Party 0 encrypts a message. Each party performs a partial decryption of the ciphertext. These partials are then combined to attempt to retrieve the original message. The code contains a comment "NOTE: Doesnt work!!", **indicating** incompleteness.
   * **Math Used**:
     * Polynomial generation (`generate_poly`).
     * Encryption using the hybrid scheme: `parties.encrypt(m)`.
     * Partial decryption by each party: `p.decrypt(ct, partial=True)`.
-    * Simulated combination of partial decryptions:
-\$ combined_sum = \sum_{i} partial_i \$
+    * Simulated combination of partial decryptions: $\text{combined\_sum} = \sum_{i} partial_i$
 This is done using `np.sum(partials, axis=0)`.
-    * Modular reduction of the combined sum:
-\$ combined = combined_sum \pmod p \$
+    * Modular reduction of the combined sum: $combined = \text{combined\_sum} \pmod p$
 This is `poly_mod(combined_sum, params["p"])`.
   * **Simulated Aspect**: The method of combining partial decryptions (`np.sum(partials, axis=0)`) is a highly simplified placeholder. Real multiparty FHE decryption involves complex cryptographic protocols tailored to how the secret key shares are used and how the partially decrypted components (which are themselves often polynomials or ring elements) are mathematically combined to reconstruct the plaintext without revealing the key shares. This usually involves specific algebraic properties of the scheme (e.g., Shamir's Secret Sharing applied to key components, or specific homomorphic properties of the decryption function).
 * **`_benchmark_ckks(iterations)`**
@@ -44,27 +38,16 @@ This is `poly_mod(combined_sum, params["p"])`.
   * **Purpose**: Benchmarks the performance of the BFV (Brakerski/Fan-Vercauteren) FHE scheme.
   * **Details**: Uses `tenseal` for BFV. BFV is designed for exact arithmetic over finite fields or integers.
   * **Math Used**:
-    * Generation of random integer vectors (`np.random.randint`) as plaintexts.
+    * Generation of random **integer** vectors (`np.random.randint`) as plaintexts.
     * BFV operations from `tenseal`. These involve polynomial arithmetic (addition, multiplication) in a polynomial ring $R_q = \mathbb{Z}_q[x]/(x^N+1)$, with plaintexts in $R_p = \mathbb{Z}_p[x]/(x^N+1)$.
 * **`_benchmark_ntru_rlwe(iterations)`**
   * **Purpose**: Benchmarks the performance of the custom NTRU-RLWE hybrid scheme implemented in `hybrid.py`.
   * **Details**: Measures encryption, addition, and multiplication times for the custom scheme.
   * **Math Used**: Relies on the mathematical operations defined within the `NTRU_RLWE_Hybrid` class (see `hybrid.py` detailed below).
-* **`plot_results(results_df)`**
-  * **Purpose**: Generates a composite plot summarizing operation times, feature support, and speedup comparisons of different schemes relative to BFV.
-  * **Math Used**:
-    * Logarithmic scale for time axes (`plt.yscale('log')`).
-    * Calculation of total operation time for a scheme:
-\$ T_{total} = T_{enc} + T_{add} + T_{mul} \$
-    * Speedup calculation relative to a baseline (BFV):
-\$ Speedup_{scheme} = \frac{T_{total, BFV}}{T_{total, scheme}} \$
 * **`_benchmark_noise_growth(iterations=3)`**
   * **Purpose**: Benchmarks how noise accumulates in ciphertexts after repeated homomorphic operations, focusing on the NTRU-RLWE scheme.
   * **Details**: Calls `scheme.noise_growth_benchmark` for the NTRU-RLWE scheme. Notes that similar implementation for CKKS/BFV could be added.
   * **Math Used**: Relies on the noise estimation and operational methods of the FHE schemes themselves (particularly `NTRU_RLWE_Hybrid.noise_growth_benchmark`).
-* **`plot_noise_growth(results_df, save_dir="results")`**
-  * **Purpose**: Generates and saves line plots visualizing noise growth in RLWE and NTRU components for schemes where this data is available.
-  * **Math Used**: Visualizes noise estimates; no new calculations beyond what's in `results_df`.
 * **`_estimate_ckks_noise(encrypted)`**
   * **Purpose**: Attempts to estimate the noise in a CKKS ciphertext obtained from `tenseal`.
   * **Details**: Tries to use the `encrypted.noise()` method if available. As a fallback, it calculates the standard deviation of the decrypted values and scales it by an arbitrary factor (1000).
@@ -84,10 +67,3 @@ This is `poly_mod(combined_sum, params["p"])`.
   * **Purpose**: Compares noise characteristics across NTRU-RLWE, CKKS, and BFV for encryption, addition, and multiplication.
   * **Details**: Initializes scheme contexts with specific parameters (polynomial modulus degree, coefficient moduli, plaintext modulus). Uses scheme-specific noise estimation methods (`scheme.estimate_noise` for NTRU-RLWE, and the `_estimate_ckks_noise`, `_estimate_bfv_noise` proxies for the others).
   * **Math Used**: The mathematics involved in the respective noise estimation functions of each scheme. Parameter choices like polynomial degree ($N$), ciphertext modulus ($q$), and plaintext modulus ($p$) are fundamental to FHE security and correctness.
-* **`plot_noise_comparison(results_df, save_dir="results")`**
-  * **Purpose**: Generates various plots comparing noise levels and growth across schemes.
-  * **Details**: Includes bar plots of noise by operation, line plots of noise growth, and relative noise increase.
-  * **Math Used**:
-    * Logarithmic scale for noise values.
-    * Noise normalization:
-\$ Noise_{normalized} = \frac{Noise_{current_op}}{Noise_{initial_encryption}} \$
