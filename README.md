@@ -1,9 +1,9 @@
 # NTRU-RLWE Hybrid Scheme Demonstration
 
-| S. No |    ID No.     | Name             |
-| ----: | :-----------: | :--------------- |
-|    1. | 2022A7PS0004U | Yusra Hakim      |
-|    2. | 2022A7PS0019U | Joseph Cijo      |
+| S. No |    ID No.     | Name                                                   |
+| ----: | :-----------: | :------------------------------------------------------|
+|    1. | 2022A7PS0004U | [Yusra Hakim](https://github.com/Sapphire-Starflower)  |
+|    2. | 2022A7PS0019U | [Joseph Cijo](https://github.com/joejo-joestar)        |
 
 This project demonstrates the NTRU-RLWE hybrid scheme for homomorphic encryption, focusing on its performance in terms of encryption, decryption, and bootstrapping operations. The demonstration includes a comparison with existing schemes like CKKS and BVK using the TenSEAL library.
 
