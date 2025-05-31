@@ -1,4 +1,4 @@
-# NTRU-RLWE Hybrid Scheme Demonstration
+# 🔐 NTRU-RLWE Hybrid Scheme Demonstration
 
 | S. No |    ID No.     | Name                                                   |
 | ----: | :-----------: | :------------------------------------------------------|
